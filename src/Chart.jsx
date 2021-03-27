@@ -14,6 +14,7 @@ const VaultChart =()=> {
     const [state, setState] = useState({balances:[], period:'hours'})
     useEffect(()=>{
       loadWeb3()
+      loadVault(state.period)
     },[])
     const loadWeb3= () =>{
       if (window.ethereum) {
@@ -21,7 +22,31 @@ const VaultChart =()=> {
           window.ethereum.enable();
       }
     }
-
-const Chart =()=> {
+    
+    const loadVault= async(period) =>{
+        if(!period)return;
+        try {
+            const {methods:{getPricePerFullShare,balanceOf}} = await new window.web3.eth.Contract(vaultAIB, '0xcC7E70A958917cCe67B4B87a8C30E6297451aE98')
+            const {selectedAddress} =window.ethereum
+            console.log(selectedAddress)
+            const {fromWei} = window.web3.utils
+            const dater = new EthDater( window.web3);
+            console.log(period)
+            let blocks = await dater.getEvery( period, '2021-03-20T12:00:00Z',  Date.now());
+            const balances = await Promise.all(blocks.map(async (b,i,arr)=>{
+                const price = fromWei(await getPricePerFullShare().call({},b.block))
+                const balance = fromWei(await balanceOf(selectedAddress).call({},b.block))
+                const gusdCRV=+price*+balance*1.015
+                return {...b, gusdCRV,price,balance, date:dayjs(b.date).format('DD-MMM  HHa')} 
+            }))
+            setState({
+                period,
+                balances: balances.map((b,i,arr)=>({...b,diff:b.gusdCRV - arr[i-1]?.gusdCRV || 0}))
+                .filter(b=>b.diff)
+            })
+        } catch (error) {
+            console.warn(error)
+        }
+    }
 }
 export default VaultChart
