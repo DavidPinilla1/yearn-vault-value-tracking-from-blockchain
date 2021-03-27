@@ -11,6 +11,16 @@ import EthDater  from 'ethereum-block-by-date';
 import dayjs from 'dayjs'
 
 const VaultChart =()=> {
+    const [state, setState] = useState({balances:[], period:'hours'})
+    useEffect(()=>{
+      loadWeb3()
+    },[])
+    const loadWeb3= () =>{
+      if (window.ethereum) {
+          window.web3 = new Web3(window.ethereum);
+          window.ethereum.enable();
+      }
+    }
 
 const Chart =()=> {
 }
