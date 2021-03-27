@@ -48,5 +48,24 @@ const VaultChart =()=> {
             console.warn(error)
         }
     }
+        <div style={{ padding: "20px" } }>
+            {state.balances &&
+            <Chart
+                appendPadding={[10, 0, 0, 10]}
+                autoFit
+                height={500}
+                data={state.balances}
+                scale={
+                    { gusdCRV: { min: 24200, alias: 'GUSD', type: 'linear-strict' ,}},
+                    { diff: { min: 0, alias: 'USD', type: 'linear-strict', }}
+                }>
+                <Interval position="date*diff"  color="#a8ffd6" />
+                <LineAdvance position="date*gusdCRV" point shape="smooth" />
+                <Tooltip showCrosshairs visible />
+            </Chart>
+            }
+        </div>
+    );
+	
 }
 export default VaultChart
